@@ -1,0 +1,33 @@
+services:
+  api:
+    build:
+      context: ../services/api
+    container_name: pis_api
+    expose:
+      - "8000"
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: pis_nginx
+    depends_on:
+      - api
+    ports:
+      - "8080:80"
+    volumes:
+      - ../services/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: pis_postgres
+    environment:
+      POSTGRES_DB: incidentsim
+      POSTGRES_USER: incidentsim
+      POSTGRES_PASSWORD: incidentsim
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: pis_redis
+    ports:
+      - "6379:6379"
