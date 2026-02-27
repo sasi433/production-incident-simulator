@@ -2,13 +2,11 @@ services:
   api:
     build:
       context: ../services/api
-    container_name: pis_api
     expose:
       - "8000"
 
   nginx:
     image: nginx:1.27-alpine
-    container_name: pis_nginx
     depends_on:
       - api
     ports:
@@ -18,7 +16,6 @@ services:
 
   postgres:
     image: postgres:16-alpine
-    container_name: pis_postgres
     environment:
       POSTGRES_DB: incidentsim
       POSTGRES_USER: incidentsim
@@ -28,6 +25,5 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: pis_redis
     ports:
       - "6379:6379"
