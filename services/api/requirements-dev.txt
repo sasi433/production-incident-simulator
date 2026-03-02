@@ -1,0 +1,11 @@
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+structlog==24.4.0
+redis==5.2.1
+SQLAlchemy==2.0.36
+tenacity==9.0.0
+
+# Note: `asyncpg` is excluded here because it builds C extensions
+# that may fail on some Windows setups. Keep `asyncpg` in
+# `requirements.txt` for production where containers/build agents
+# provide the proper toolchain.
