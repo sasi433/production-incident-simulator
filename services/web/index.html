@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Production Incident Simulator — Demo Shop</title>
+    <link rel="stylesheet" href="/ui/styles.css" />
+  </head>
+  <body>
+    <header class="container">
+      <h1>Production Incident Simulator</h1>
+      <p class="muted">Minimal demo UI served by Nginx. API is FastAPI + Postgres + Redis.</p>
+
+      <div class="row">
+        <button id="btnLogin">Login (create session)</button>
+        <button id="btnRefresh">Refresh Products</button>
+        <button id="btnCart">View Cart</button>
+      </div>
+
+      <div class="row">
+        <span class="badge">X-Request-ID:</span>
+        <code id="reqId">—</code>
+      </div>
+
+      <div id="status" class="status">Ready.</div>
+    </header>
+
+    <main class="container">
+      <section>
+        <h2>Products</h2>
+        <div id="products" class="grid"></div>
+      </section>
+
+      <section>
+        <h2>Checkout</h2>
+        <form id="checkoutForm" class="card">
+          <div class="row">
+            <label>Total (cents)</label>
+            <input id="totalCents" type="number" min="0" value="4999" />
+          </div>
+          <div class="row">
+            <label>User ID</label>
+            <input id="userId" type="text" value="demo-user" />
+          </div>
+          <button type="submit">Create Order</button>
+        </form>
+
+        <pre id="checkoutResult" class="pre"></pre>
+      </section>
+
+      <section>
+        <h2>Health</h2>
+        <div class="row">
+          <button id="btnHealth">/healthz</button>
+          <button id="btnReady">/readyz</button>
+        </div>
+        <pre id="healthResult" class="pre"></pre>
+      </section>
+    </main>
+
+    <script src="/ui/app.js"></script>
+  </body>
+</html>

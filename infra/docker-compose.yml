@@ -42,3 +42,4 @@ services:
       - "8080:80"
     volumes:
       - ../services/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../services/web:/usr/share/nginx/html:ro
