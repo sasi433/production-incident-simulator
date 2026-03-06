@@ -33,6 +33,20 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    environment:
+      FAILURE_MODE: "random_500"   # off | db_slow | redis_down | random_500
+      CHAOS_PROBABILITY: "0.30"
+
+      DB_TIMEOUT_S: "0.8"
+      DB_STATEMENT_TIMEOUT_MS: "800"
+
+      REDIS_TIMEOUT_S: "0.4"
+      REDIS_CB_FAILS: "3"
+      REDIS_CB_RESET_S: "10"
+
+      RETRY_ATTEMPTS: "3"
+      RETRY_INITIAL_S: "0.1"
+      RETRY_MAX_S: "1.5"
 
   nginx:
     image: nginx:1.27-alpine

@@ -1,9 +1,29 @@
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from sqlalchemy.orm import declarative_base
+import os
 
-DATABASE_URL = "postgresql+asyncpg://incidentsim:incidentsim@postgres:5432/incidentsim"
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
+from sqlalchemy.orm import DeclarativeBase
 
-engine = create_async_engine(DATABASE_URL, echo=False)
-SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql+asyncpg://incidentsim:incidentsim@postgres:5432/incidentsim",
+)
 
-Base = declarative_base()
+engine = create_async_engine(DATABASE_URL, echo=False, future=True)
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+async_session_maker = async_sessionmaker(
+    bind=engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+)
+
+# Backwards compatible name used across the codebase
+SessionLocal = async_session_maker
