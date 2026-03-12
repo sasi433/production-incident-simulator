@@ -37,7 +37,7 @@ async def ping() -> bool:
     if not breaker.allow():
         raise DependencyUnavailable("redis_circuit_open")
 
-    await maybe_inject_failure("redis")
+    #await maybe_inject_failure("redis")
 
     try:
         ok = await with_timeout("redis", get_client().ping(), REDIS_TIMEOUT_S)
@@ -54,7 +54,7 @@ async def get(key: str) -> Optional[str]:
     if not breaker.allow():
         raise DependencyUnavailable("redis_circuit_open")
 
-    await maybe_inject_failure("redis")
+    #await maybe_inject_failure("redis")
 
     try:
         val = await with_timeout("redis", get_client().get(key), REDIS_TIMEOUT_S)
@@ -71,7 +71,7 @@ async def setex(key: str, ttl_s: int, value: str) -> None:
     if not breaker.allow():
         raise DependencyUnavailable("redis_circuit_open")
 
-    await maybe_inject_failure("redis")
+    #await maybe_inject_failure("redis")
 
     try:
         await with_timeout("redis", get_client().setex(key, ttl_s, value), REDIS_TIMEOUT_S)

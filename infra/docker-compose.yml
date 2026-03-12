@@ -48,7 +48,7 @@ services:
       RETRY_INITIAL_S: "0.1"
       RETRY_MAX_S: "1.5"
 
-      INCIDENT_CHECKOUT: "true"
+      INCIDENT_CHECKOUT: "false"
 
   nginx:
     image: nginx:1.27-alpine
