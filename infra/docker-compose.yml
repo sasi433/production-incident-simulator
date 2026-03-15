@@ -50,6 +50,8 @@ services:
 
       INCIDENT_CHECKOUT: "false"
 
+      INCIDENT_PRICING_CACHE: "false"
+
   nginx:
     image: nginx:1.27-alpine
     depends_on:
