@@ -4,37 +4,61 @@ import structlog
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 
+from app.metrics import HTTP_REQUEST_DURATION_SECONDS, HTTP_REQUESTS_TOTAL
+
 log = structlog.get_logger("http")
 
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         start = time.perf_counter()
+        method = request.method
+        path = request.url.path
 
         try:
             response = await call_next(request)
+            duration = time.perf_counter() - start
+            status_code = response.status_code
 
-            duration_ms = (time.perf_counter() - start) * 1000
+            HTTP_REQUESTS_TOTAL.labels(
+                method=method,
+                path=path,
+                status=str(status_code),
+            ).inc()
+
+            HTTP_REQUEST_DURATION_SECONDS.labels(
+                method=method,
+                path=path,
+            ).observe(duration)
 
             log.info(
                 "request_completed",
-                request_id=getattr(request.state, "request_id", None),
-                method=request.method,
-                path=request.url.path,
-                status=response.status_code,
-                duration_ms=round(duration_ms, 2),
+                method=method,
+                path=path,
+                status=status_code,
+                duration_ms=round(duration * 1000, 2),
             )
             return response
 
         except Exception:
-            duration_ms = (time.perf_counter() - start) * 1000
+            duration = time.perf_counter() - start
+
+            HTTP_REQUESTS_TOTAL.labels(
+                method=method,
+                path=path,
+                status="500",
+            ).inc()
+
+            HTTP_REQUEST_DURATION_SECONDS.labels(
+                method=method,
+                path=path,
+            ).observe(duration)
 
             log.error(
                 "request_failed",
-                request_id=getattr(request.state, "request_id", None),
-                method=request.method,
-                path=request.url.path,
+                method=method,
+                path=path,
                 status=500,
-                duration_ms=round(duration_ms, 2),
+                duration_ms=round(duration * 1000, 2),
             )
             raise

@@ -18,6 +18,8 @@ from app.cache import check_redis
 
 from app.clients import redis_client
 
+from app.metrics import metrics_response
+
 from app.routers.products import router as products_router
 from app.routers.checkout import router as checkout_router
 from app.routers.auth import router as auth_router
@@ -93,3 +95,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
         error=str(exc),
     )
     return JSONResponse(status_code=500, content={"error": "internal_server_error"})
+
+@app.get("/metrics")
+async def metrics():
+    return metrics_response()

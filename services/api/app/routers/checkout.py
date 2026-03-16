@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from app.core.config import incident_checkout_enabled
 from app.db.models import Order
 from app.db.session import async_session_maker
+from app.metrics import CHECKOUT_FAILURES_TOTAL, CHECKOUT_REQUESTS_TOTAL
 
 router = APIRouter(tags=["checkout"])
 log = structlog.get_logger("checkout")
@@ -20,11 +21,16 @@ class CheckoutRequest(BaseModel):
 
 @router.post("/checkout")
 async def checkout(req: CheckoutRequest):
+    # metric: every checkout attempt
+    CHECKOUT_REQUESTS_TOTAL.inc()
+
     if incident_checkout_enabled():
         roll = random.random()
 
         # 25% hard failure
         if roll < 0.25:
+            CHECKOUT_FAILURES_TOTAL.inc()
+
             log.warning(
                 "incident_checkout_failure_triggered",
                 incident="checkout_intermittent_failure",
@@ -52,5 +58,12 @@ async def checkout(req: CheckoutRequest):
         session.add(order)
         await session.commit()
         await session.refresh(order)
+
+        log.info(
+            "checkout_completed",
+            order_id=str(order.id),
+            user_id=req.user_id,
+            total_cents=req.total_cents,
+        )
 
         return {"order_id": str(order.id)}
