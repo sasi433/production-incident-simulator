@@ -1,31 +1,92 @@
 # production-incident-simulator
 
-A dockerized mini production system that will simulate real production incidents with observability and postmortems.
+A dockerized mini production system that simulates real-world production incidents with observability, metrics, and postmortems.
 
-> Day 1: System foundation only (no incidents yet)
+This project is designed to demonstrate **senior-level backend and production engineering skills** including debugging, system design, and incident analysis.
 
 ---
 
-## What Exists Today
+## What This Project Includes
 
-The system boots with:
+A fully working production-style stack:
 
-- FastAPI (API service)
-- PostgreSQL (database container)
-- Redis (cache/session container)
+- FastAPI (application service)
+- PostgreSQL (persistent storage)
+- Redis (sessions + caching)
 - Nginx (reverse proxy)
 - Docker Compose (orchestration)
 
-No business logic or failure simulations yet.  
-This commit establishes the production-style infrastructure layout.
+### Implemented Capabilities
+
+- Structured JSON logging (structlog)
+- Correlation ID tracing across requests
+- Readiness and health endpoints
+- Redis-backed sessions and cart
+- Product caching layer
+- Prometheus metrics (`/metrics`)
+- Load testing script
+- Incident runbook
+- Postmortem documentation
 
 ---
 
-## Architecture (Day 1)
+## Simulated Production Incidents
 
+This system intentionally includes **realistic failure scenarios** that can be toggled via environment variables.
+
+### 1. Checkout Intermittent Failure
+
+```
+INCIDENT_CHECKOUT=true
+```
+
+- Random request failures (~25%)
+- Artificial latency injection
+- Demonstrates retry/debug scenarios
+
+---
+
+### 2. Pricing Cache Bug
+
+```
+INCIDENT_PRICING_CACHE=true
+```
+
+- Incorrect Redis cache key usage
+- Product responses may return wrong pricing
+- Demonstrates cache invalidation issues
+
+---
+
+### 3. Session / Cart Reset Bug
+
+```
+INCIDENT_SESSION_RESET=true
+```
+
+- Redis key mismatch for cart
+- Cart appears to randomly reset
+- Demonstrates session consistency problems
+
+---
+
+## Architecture
+
+```
 Client → Nginx → FastAPI
+                 ↓
+        ---------------------
+        |   PostgreSQL      |
+        |   Redis           |
+        ---------------------
+```
 
-PostgreSQL and Redis containers are running but not yet wired into the API.
+### Key Design Decisions
+
+- Separation of concerns (API / infra / services)
+- Redis used for both session state and caching
+- Postgres used for durable order storage
+- Observability added before scaling complexity
 
 ---
 
@@ -37,53 +98,211 @@ From project root:
 docker compose -f infra/docker-compose.yml up --build
 ```
 
-Open:
+---
+
+## Endpoints
+
+### Health
 
 ```
-http://localhost:8080/healthz
+GET /healthz
 ```
 
-Expected response:
+### Readiness
 
-```json
-{"status":"ok"}
+```
+GET /readyz
+```
+
+### Products
+
+```
+GET /products
+GET /products/{id}
+```
+
+### Cart
+
+```
+GET /cart
+POST /cart/items
+```
+
+### Checkout
+
+```
+POST /checkout
+```
+
+### Metrics
+
+```
+GET /metrics
 ```
 
 ---
 
-## Project Structure (Current)
+## Example Usage
+
+### Login
+
+```bash
+curl.exe -X POST http://localhost:8080/login
+```
+
+### Add to cart
+
+```bash
+curl.exe -X POST \
+  --cookie "session_id=YOUR_SESSION_ID" \
+  -H "Content-Type: application/json" \
+  --data-binary "@body.json" \
+  http://localhost:8080/cart/items
+```
+
+### Checkout
+
+```bash
+curl.exe -X POST \
+  -H "Content-Type: application/json" \
+  --data-binary "@checkout_body.json" \
+  http://localhost:8080/checkout
+```
+
+---
+
+## Observability
+
+### Metrics
+
+Available at:
+
+```
+http://localhost:8080/metrics
+```
+
+Includes:
+
+- `http_requests_total`
+- `http_request_duration_seconds`
+- `checkout_requests_total`
+- `checkout_failures_total`
+
+---
+
+### Logs
+
+Structured JSON logs include:
+
+- correlation IDs
+- request metadata
+- incident triggers
+- cache hits/misses
+- session lookup issues
+
+---
+
+## Load Testing
+
+Basic load test script:
+
+```
+scripts/load_test.sh
+```
+
+Example:
+
+```bash
+BASE_URL=http://localhost:8080 REQUESTS=50 ./scripts/load_test.sh
+```
+
+Use this to:
+
+- trigger checkout failures
+- observe latency spikes
+- inspect metrics behavior
+
+---
+
+## Runbook
+
+See:
+
+```
+docs/runbook.md
+```
+
+Includes:
+
+- how to reproduce each incident
+- what logs to inspect
+- what metrics to monitor
+
+---
+
+## Postmortems
+
+Each incident includes a postmortem:
+
+- `postmortem_checkout.md`
+- `postmortem_pricing.md`
+- `postmortem_sessions.md`
+
+These document:
+
+- impact
+- root cause
+- detection
+- resolution
+- prevention strategies
+
+---
+
+## How I Would Improve This in Production
+
+- Add distributed tracing (OpenTelemetry)
+- Introduce circuit breakers and retries
+- Add cache invalidation strategies
+- Implement background workers (Celery / Kafka)
+- Add alerting based on Prometheus metrics
+- Introduce CI/CD pipeline with automated tests
+- Add chaos engineering scenarios
+
+---
+
+## Project Structure
 
 ```
 production-incident-simulator/
   services/
     api/
+      app/
+        routers/
+        services/
+        core/
+        clients/
     nginx/
   infra/
     docker-compose.yml
+  docs/
+    runbook.md
+    postmortems/
+  scripts/
+    load_test.sh
   README.md
 ```
 
 ---
 
-## Upcoming Work
+## Purpose of This Project
 
-- Structured JSON logging
-- Correlation IDs
-- Readiness checks (/readyz)
-- PostgreSQL integration
-- Redis sessions
-- Intentional incident simulations
-- Runbook and postmortems
+This project demonstrates:
+
+- production debugging mindset
+- system observability design
+- realistic failure modeling
+- ability to reason about distributed systems
+- backend engineering maturity beyond CRUD APIs
 
 ---
 
-## Purpose of This Project
-
-This repository is designed to demonstrate:
-
-- Production-oriented system design
-- Debugging maturity
-- Observability-first thinking
-- Real-world failure analysis
-
-More features and incident simulations will be added in upcoming commits.
