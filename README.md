@@ -152,20 +152,44 @@ curl.exe -X POST http://localhost:8080/login
 
 ### Add to cart
 
+Example request body:
+
+```json
+{
+  "product_id": "YOUR_PRODUCT_ID",
+  "qty": 1
+}
+```
+
+Example command:
+
 ```bash
 curl.exe -X POST \
   --cookie "session_id=YOUR_SESSION_ID" \
   -H "Content-Type: application/json" \
-  --data-binary "@body.json" \
+  -d "{\"product_id\":\"YOUR_PRODUCT_ID\",\"qty\":1}" \
   http://localhost:8080/cart/items
 ```
 
+---
+
 ### Checkout
+
+Example request body:
+
+```json
+{
+  "user_id": "demo",
+  "total_cents": 1000
+}
+```
+
+Example command:
 
 ```bash
 curl.exe -X POST \
   -H "Content-Type: application/json" \
-  --data-binary "@checkout_body.json" \
+  -d "{\"user_id\":\"demo\",\"total_cents\":1000}" \
   http://localhost:8080/checkout
 ```
 
@@ -244,9 +268,9 @@ Includes:
 
 Each incident includes a postmortem:
 
-- `postmortem_checkout.md`
-- `postmortem_pricing.md`
-- `postmortem_sessions.md`
+- `docs/postmortem_checkout.md`
+- `docs/postmortem_pricing.md`
+- `docs/postmortem_sessions.md`
 
 These document:
 
@@ -277,16 +301,17 @@ production-incident-simulator/
   services/
     api/
       app/
-        routers/
-        services/
-        core/
-        clients/
-    nginx/
+        routers/        # API endpoints
+        services/       # business logic (cache, cart, etc.)
+        clients/        # external clients (redis, db)
+        core/           # config, logging, metrics
+        middleware/     # request tracing, logging
+    nginx/              # reverse proxy config
   infra/
-    docker-compose.yml
+    docker-compose.yml  # service orchestration
   docs/
     runbook.md
-    postmortems/
+    postmortem_*.md
   scripts/
     load_test.sh
   README.md
@@ -305,4 +330,3 @@ This project demonstrates:
 - backend engineering maturity beyond CRUD APIs
 
 ---
-

@@ -27,6 +27,7 @@ async def checkout(req: CheckoutRequest):
     if incident_checkout_enabled():
         roll = random.random()
 
+        # Incident mode: intermittent failure injection to test alerting/rollback.
         # 25% hard failure
         if roll < 0.25:
             CHECKOUT_FAILURES_TOTAL.inc()

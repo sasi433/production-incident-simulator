@@ -4,9 +4,14 @@ from typing import Optional
 import redis.asyncio as redis
 import structlog
 
-from app.core.resilience import CircuitBreaker, DependencyUnavailable, maybe_inject_failure, retryable_dependency_call, with_timeout
+from app.core.resilience import CircuitBreaker, DependencyUnavailable, retryable_dependency_call, with_timeout
 
 log = structlog.get_logger("redis")
+
+# This Redis client is a thin dependency wrapper and does not itself inject
+# incident behavior. Fault injections for business features should remain close
+# to those features (cart/product/checkout), unless explicitly testing a
+# Redis infrastructure outage via FAILURE_MODE=redis_down in resilience.
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 REDIS_TIMEOUT_S = float(os.getenv("REDIS_TIMEOUT_S", "0.4"))
@@ -37,7 +42,9 @@ async def ping() -> bool:
     if not breaker.allow():
         raise DependencyUnavailable("redis_circuit_open")
 
-    #await maybe_inject_failure("redis")
+    # Generic failure injection is disabled in normal operation.
+    # For explicit Redis infrastructure failure tests, use FAILURE_MODE=redis_down
+    # from app/core/resilience.py instead of inlining behavior here.
 
     try:
         ok = await with_timeout("redis", get_client().ping(), REDIS_TIMEOUT_S)
@@ -54,7 +61,9 @@ async def get(key: str) -> Optional[str]:
     if not breaker.allow():
         raise DependencyUnavailable("redis_circuit_open")
 
-    #await maybe_inject_failure("redis")
+    # Generic failure injection is disabled in normal operation.
+    # For explicit Redis infrastructure failure tests, use FAILURE_MODE=redis_down
+    # from app/core/resilience.py instead of inlining behavior here.
 
     try:
         val = await with_timeout("redis", get_client().get(key), REDIS_TIMEOUT_S)
@@ -71,7 +80,9 @@ async def setex(key: str, ttl_s: int, value: str) -> None:
     if not breaker.allow():
         raise DependencyUnavailable("redis_circuit_open")
 
-    #await maybe_inject_failure("redis")
+    # Generic failure injection is disabled in normal operation.
+    # For explicit Redis infrastructure failure tests, use FAILURE_MODE=redis_down
+    # from app/core/resilience.py instead of inlining behavior here.
 
     try:
         await with_timeout("redis", get_client().setex(key, ttl_s, value), REDIS_TIMEOUT_S)

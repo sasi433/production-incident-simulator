@@ -36,6 +36,10 @@ async def maybe_inject_failure(scope: str) -> None:
     """
     Controlled failure injection for the incident simulator.
     scope: e.g., "db", "redis", "handler"
+
+    By default (FAILURE_MODE=off), this is a no-op and should not impact
+    normal request processing targets.  Explicit modes are required to
+    activate behavior.
     """
     mode = failure_mode()
     if mode == "off":

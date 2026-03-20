@@ -29,6 +29,9 @@ def _read_cart_key(session_id: str) -> str:
 
     This simulates a rollout or namespace mismatch bug where cart
     writes go to one key but reads sometimes look somewhere else.
+
+    # Read/write mismatch is intentional for incident injection:
+    # write always uses cart:{session_id}, but read can hop to cart:v2:{session_id}.
     """
     if incident_session_reset_enabled():
         use_wrong_key = random.random() < 0.5

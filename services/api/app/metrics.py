@@ -13,6 +13,8 @@ HTTP_REQUEST_DURATION_SECONDS = Histogram(
     ["method", "path"],
 )
 
+# Metrics counters used in checkout and incident handling paths.
+# They make it easy to tell when injected failure scenarios are active.
 CHECKOUT_FAILURES_TOTAL = Counter(
     "checkout_failures_total",
     "Total checkout failures",

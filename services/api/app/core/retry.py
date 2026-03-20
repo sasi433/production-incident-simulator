@@ -16,6 +16,8 @@ async def retry(
             await fn()
             return
         except Exception as e:
+            # Retry loop intentionally swallows intermediate exceptions
+            # to attempt recovery; final exception bubbles out after attempts.
             last_exc = e
             await asyncio.sleep(d)
             d *= backoff

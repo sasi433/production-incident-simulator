@@ -11,6 +11,8 @@ PRODUCT_CACHE_TTL_SECONDS = 60
 
 
 def _cache_key(product_id: str) -> str:
+    # Incident mode intentionally uses a shared cache key so unrelated
+    # product requests can collide and return incorrect cached data.
     if incident_pricing_cache_enabled():
         log.warning(
             "pricing_cache_bug_triggered",

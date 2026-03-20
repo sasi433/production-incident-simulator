@@ -4,6 +4,8 @@ import os
 def _env_flag(name: str, default: str = "false") -> bool:
     """
     Helper to read boolean feature flags from environment variables.
+
+    This is used by incident_* helpers to toggle failure-injection scenarios.
     """
     return os.getenv(name, default).strip().lower() == "true"
 
